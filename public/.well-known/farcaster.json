@@ -1,0 +1,30 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "1",
+    "name": "IdeaSpark AI",
+    "subtitle": "Built with Zara",
+    "description": "IdeaSpark AI is a Base Mini App built with Zara.",
+    "iconUrl": "https://0co.to/images/zara-2.png",
+    "homeUrl": "https://c149ad8fda2148bfa2272ff409739e57-ysxy.vercel.app",
+    "splashImageUrl": "https://c149ad8fda2148bfa2272ff409739e57-ysxy.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "heroImageUrl": "https://c149ad8fda2148bfa2272ff409739e57-ysxy.vercel.app/image.png",
+    "tagline": "IdeaSpark AI",
+    "screenshotUrls": [
+      "https://c149ad8fda2148bfa2272ff409739e57-ysxy.vercel.app/screenshot.png",
+      "https://c149ad8fda2148bfa2272ff409739e57-ysxy.vercel.app/screenshot.png"
+    ],
+    "primaryCategory": "social",
+    "tags": [
+      "base",
+      "miniapp",
+      "onchainkit"
+    ],
+    "webhookUrl": "https://c149ad8fda2148bfa2272ff409739e57-ysxy.vercel.app/api/webhook"
+  }
+}

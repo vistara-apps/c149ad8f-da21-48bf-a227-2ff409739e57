@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId       String   @id @default(cuid())
+  farcasterId  String?  @unique
+  skills       String   // JSON string of skills array
+  interests    String   // JSON string of interests array
+  capitalRange String
+  premiumStatus Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  generatedIdeas GeneratedIdea[]
+  votes          CommunityVote[]
+  comments       Comment[]
+
+  @@map("users")
+}
+
+model GeneratedIdea {
+  ideaId              String   @id @default(cuid())
+  userId              String
+  title               String
+  description         String
+  skillsRequired      String   // JSON string of required skills array
+  marketTrendAnalysis String
+  marketViabilityScore Int
+  businessModelCanvas String   // JSON string of business model canvas
+  goMarketStrategy    String
+  createdAt           DateTime @default(now())
+
+  // Relations
+  user     User             @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  votes    CommunityVote[]
+  comments Comment[]
+
+  @@map("generated_ideas")
+}
+
+model CommunityVote {
+  voteId   String   @id @default(cuid())
+  ideaId   String
+  userId   String
+  voteType String   // 'up' or 'down'
+  createdAt DateTime @default(now())
+
+  // Relations
+  idea GeneratedIdea @relation(fields: [ideaId], references: [ideaId], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([ideaId, userId]) // One vote per user per idea
+  @@map("community_votes")
+}
+
+model Comment {
+  commentId String   @id @default(cuid())
+  ideaId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  idea GeneratedIdea @relation(fields: [ideaId], references: [ideaId], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("comments")
+}

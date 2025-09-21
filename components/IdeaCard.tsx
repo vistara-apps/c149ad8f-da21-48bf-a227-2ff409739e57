@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  TrendingUp, 
-  Users, 
-  MessageCircle, 
-  ThumbsUp, 
-  ThumbsDown, 
-  ChevronDown, 
+import {
+  TrendingUp,
+  Users,
+  MessageCircle,
+  ThumbsUp,
+  ThumbsDown,
+  ChevronDown,
   ChevronUp,
   Lightbulb,
   Target,
@@ -20,9 +20,10 @@ import { VoteButton } from './VoteButton';
 interface IdeaCardProps {
   idea: GeneratedIdea;
   variant?: 'default' | 'compact';
+  onVote?: (ideaId: string, voteType: 'up' | 'down') => void;
 }
 
-export function IdeaCard({ idea, variant = 'default' }: IdeaCardProps) {
+export function IdeaCard({ idea, variant = 'default', onVote }: IdeaCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showBusinessModel, setShowBusinessModel] = useState(false);
 
@@ -176,12 +177,14 @@ export function IdeaCard({ idea, variant = 'default' }: IdeaCardProps) {
             voteType="up"
             count={upvotes}
             isActive={false} // TODO: Implement user vote tracking
+            onVote={onVote}
           />
           <VoteButton
             ideaId={idea.ideaId}
             voteType="down"
             count={downvotes}
             isActive={false} // TODO: Implement user vote tracking
+            onVote={onVote}
           />
           <button className="flex items-center space-x-2 text-white/60 hover:text-white transition-colors duration-200">
             <MessageCircle className="h-4 w-4" />

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { voteOnIdea } from '@/lib/api';
 
 interface VoteButtonProps {
   ideaId: string;
@@ -23,14 +24,15 @@ export function VoteButton({
 
   const handleVote = async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     try {
-      // TODO: Implement actual voting API call
-      onVote?.(ideaId, voteType);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await voteOnIdea(ideaId, voteType);
+      if (response.success) {
+        onVote?.(ideaId, voteType);
+      } else {
+        console.error('Failed to vote:', response.error);
+      }
     } catch (error) {
       console.error('Error voting:', error);
     } finally {

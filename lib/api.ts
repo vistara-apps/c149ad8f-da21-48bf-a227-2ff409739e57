@@ -113,7 +113,7 @@ Format your response as a JSON array of ideas with the following structure:
         userId: 'current-user',
         title: 'AI-Powered Code Review Assistant',
         description: 'A developer tool that uses AI to automatically review code, suggest improvements, and catch potential bugs before they reach production. Integrates with popular IDEs and version control systems.',
-        skillsRequired: profile.skills.slice(0, 3),
+        skillsRequired: ['JavaScript', 'React', 'Node.js'],
         marketTrendAnalysis: 'The developer tools market is growing rapidly with increasing demand for AI-powered solutions. Code quality and security are top priorities for development teams.',
         marketViabilityScore: 82,
         businessModelCanvas: {

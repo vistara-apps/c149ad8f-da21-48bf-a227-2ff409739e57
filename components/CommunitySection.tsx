@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { Users, TrendingUp, MessageCircle, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, TrendingUp, MessageCircle, Filter, Loader2 } from 'lucide-react';
 import { IdeaCard } from './IdeaCard';
 import { GeneratedIdea } from '@/lib/types';
+import { getCommunityIdeas } from '@/lib/api';
 
 // Mock data for demonstration
 const mockCommunityIdeas: GeneratedIdea[] = [
@@ -65,26 +66,75 @@ const mockCommunityIdeas: GeneratedIdea[] = [
 ];
 
 export function CommunitySection() {
-  const [ideas] = useState<GeneratedIdea[]>(mockCommunityIdeas);
+  const [ideas, setIdeas] = useState<GeneratedIdea[]>([]);
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'viability'>('popular');
   const [filterBy, setFilterBy] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const sortedIdeas = [...ideas].sort((a, b) => {
-    switch (sortBy) {
-      case 'recent':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'popular':
-        const aVotes = (a.votes?.filter(v => v.voteType === 'up').length || 0) - 
-                      (a.votes?.filter(v => v.voteType === 'down').length || 0);
-        const bVotes = (b.votes?.filter(v => v.voteType === 'up').length || 0) - 
-                      (b.votes?.filter(v => v.voteType === 'down').length || 0);
-        return bVotes - aVotes;
-      case 'viability':
-        return b.marketViabilityScore - a.marketViabilityScore;
-      default:
-        return 0;
+  useEffect(() => {
+    loadCommunityIdeas();
+  }, [sortBy]);
+
+  const loadCommunityIdeas = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getCommunityIdeas(sortBy, 20);
+      if (response.success && response.data) {
+        setIdeas(response.data);
+      } else {
+        setError(response.error || 'Failed to load community ideas');
+        // Fallback to mock data
+        setIdeas([]);
+      }
+    } catch (err) {
+      console.error('Error loading community ideas:', err);
+      setError('Failed to load community ideas');
+      setIdeas([]);
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
+
+  const handleVote = (ideaId: string, voteType: 'up' | 'down') => {
+    // Update local state optimistically
+    setIdeas(prevIdeas =>
+      prevIdeas.map(idea => {
+        if (idea.ideaId === ideaId) {
+          const existingVote = idea.votes.find(v => v.userId === 'current-user');
+          let newVotes = [...idea.votes];
+
+          if (existingVote) {
+            // Update existing vote
+            if (existingVote.voteType === voteType) {
+              // Remove vote if same type
+              newVotes = newVotes.filter(v => v.userId !== 'current-user');
+            } else {
+              // Change vote type
+              newVotes = newVotes.map(v =>
+                v.userId === 'current-user' ? { ...v, voteType } : v
+              );
+            }
+          } else {
+            // Add new vote
+            newVotes.push({
+              voteId: `temp-${Date.now()}`,
+              ideaId,
+              userId: 'current-user',
+              voteType,
+              createdAt: new Date(),
+            });
+          }
+
+          return { ...idea, votes: newVotes };
+        }
+        return idea;
+      })
+    );
+  };
+
+
 
   return (
     <section id="community" className="py-12">
@@ -149,18 +199,41 @@ export function CommunitySection() {
           
           <div className="flex items-center space-x-2">
             <span className="text-white/60 text-sm">
-              Showing {sortedIdeas.length} ideas
+              Showing {ideas.length} ideas
             </span>
           </div>
         </div>
       </div>
 
       {/* Ideas Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {sortedIdeas.map((idea) => (
-          <IdeaCard key={idea.ideaId} idea={idea} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-white/60">Loading community ideas...</span>
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className="text-red-400 mb-4">{error}</div>
+          <button
+            onClick={loadCommunityIdeas}
+            className="btn-secondary"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : ideas.length === 0 ? (
+        <div className="text-center py-12">
+          <MessageCircle className="h-12 w-12 text-white/40 mx-auto mb-4" />
+          <div className="text-white/60">No community ideas found yet.</div>
+          <div className="text-white/40 text-sm">Be the first to generate and share an idea!</div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {ideas.map((idea) => (
+            <IdeaCard key={idea.ideaId} idea={idea} onVote={handleVote} />
+          ))}
+        </div>
+      )}
 
       {/* Load More */}
       <div className="text-center mt-8">
